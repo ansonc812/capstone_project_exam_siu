@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}UK Crime Analysis - Dashboard Selection{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1>UK Police Crime Rate Analysis</h1>
+                <p class="lead">Comprehensive crime data analysis supporting strategic, tactical, and analytical decision making</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="row">
+                <!-- Strategic Dashboard Card -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Strategic Dashboard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="text-muted">Executive Overview</h6>
+                            <p class="card-text">High-level insights for police commissioners, chief constables, and government officials.</p>
+                            
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Regional crime comparison</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Resource allocation metrics</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Performance benchmarking</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Budget efficiency analysis</li>
+                            </ul>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <strong>Target Users:</strong> Police Commissioners, Chief Constables, Government Officials
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="/strategic" class="btn btn-primary w-100">
+                                Access Strategic Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tactical Dashboard Card -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-map-marked-alt me-2"></i>Tactical Dashboard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="text-muted">Operational Command</h6>
+                            <p class="card-text">Real-time operational support for area commanders and resource deployment officers.</p>
+                            
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Active incident monitoring</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Crime hotspot identification</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Resource deployment optimization</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Response time tracking</li>
+                            </ul>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <strong>Target Users:</strong> Area Commanders, Shift Supervisors, Emergency Coordinators
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="/tactical" class="btn btn-warning w-100">
+                                Access Tactical Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytical Dashboard Card -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-analytics me-2"></i>Analytical Dashboard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="text-muted">Deep Analysis & Research</h6>
+                            <p class="card-text">Advanced analytics for crime pattern analysis and investigative support.</p>
+                            
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Pattern correlation analysis</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Demographic correlations</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Seasonal trend analysis</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Predictive modeling insights</li>
+                            </ul>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <strong>Target Users:</strong> Crime Analysts, Detectives, Researchers
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="/analytical" class="btn btn-info w-100">
+                                Access Analytical Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Information Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="card-title mb-0">Project Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Case Study: UK Police Crime Rate Analysis</h6>
+                            <p class="text-muted">
+                                This comprehensive analysis addresses critical challenges in crime prevention, 
+                                resource allocation, and public safety management across the United Kingdom.
+                            </p>
+                            
+                            <h6>Data Sources & Methods</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-database text-primary me-2"></i>Police API (data.police.uk)</li>
+                                <li><i class="fas fa-file-csv text-success me-2"></i>Public datasets (ONS, local government)</li>
+                                <li><i class="fas fa-code text-info me-2"></i>Web scraping and data aggregation</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Technical Implementation</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-server text-danger me-2"></i>Flask backend with SQLAlchemy ORM</li>
+                                <li><i class="fas fa-chart-bar text-warning me-2"></i>Chart.js and D3.js visualizations</li>
+                                <li><i class="fas fa-map text-success me-2"></i>Leaflet.js interactive maps</li>
+                                <li><i class="fas fa-database text-primary me-2"></i>SQLite database with 10+ entities</li>
+                            </ul>
+                            
+                            <h6>Dataset Specifications</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i>15,000+ crime records</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>20+ attributes per record</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>10 major UK cities covered</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>24-month temporal coverage</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

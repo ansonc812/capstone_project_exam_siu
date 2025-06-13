@@ -1,0 +1,594 @@
+{% extends "base.html" %}
+
+{% block title %}Tactical Dashboard - UK Crime Analysis{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1><i class="fas fa-map-marked-alt me-3"></i>Tactical Dashboard</h1>
+                <p class="lead">Operational Command & Resource Deployment</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <!-- Real-time Alert Banner -->
+    <div class="row">
+        <div class="col-12">
+            <div id="alertBanner" class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Active Monitoring:</strong> <span id="activeIncidentCount">0</span> incidents under investigation in the last 24 hours.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="row">
+        <div class="col-12">
+            <div class="filter-panel">
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="timeRange" class="form-label">Time Range</label>
+                        <select class="form-select" id="timeRange">
+                            <option value="24">Last 24 Hours</option>
+                            <option value="168">Last 7 Days</option>
+                            <option value="720">Last 30 Days</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="priorityFilter" class="form-label">Priority Level</label>
+                        <select class="form-select" id="priorityFilter">
+                            <option value="all">All Priorities</option>
+                            <option value="high">High Priority</option>
+                            <option value="medium">Medium Priority</option>
+                            <option value="low">Low Priority</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="crimeTypeFilter" class="form-label">Crime Type</label>
+                        <select class="form-select" id="crimeTypeFilter">
+                            <option value="all">All Types</option>
+                            <option value="violent">Violent Crime</option>
+                            <option value="burglary">Burglary</option>
+                            <option value="vehicle">Vehicle Crime</option>
+                            <option value="drugs">Drugs</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="areaFilter" class="form-label">Area/Beat</label>
+                        <select class="form-select" id="areaFilter">
+                            <option value="all">All Areas</option>
+                            <option value="central">City Centre</option>
+                            <option value="north">North District</option>
+                            <option value="south">South District</option>
+                            <option value="east">East District</option>
+                            <option value="west">West District</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="active">Active Only</option>
+                            <option value="all">All Status</option>
+                            <option value="open">Open</option>
+                            <option value="investigating">Under Investigation</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-primary w-100" id="refreshTactical">
+                            <i class="fas fa-sync me-2"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operational KPIs -->
+    <div class="row">
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value text-danger" id="activeIncidents">0</h4>
+                <p class="kpi-label">Active Incidents</p>
+                <small class="text-muted">Last 24 hours</small>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value text-warning" id="avgResponseTime">0</h4>
+                <p class="kpi-label">Avg Response Time</p>
+                <small class="text-muted">Minutes</small>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value text-info" id="officersOnDuty">0</h4>
+                <p class="kpi-label">Officers on Duty</p>
+                <small class="text-muted">Current shift</small>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value text-success" id="resolvedToday">0</h4>
+                <p class="kpi-label">Resolved Today</p>
+                <small class="text-muted">Cases closed</small>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value text-primary" id="hotspotCount">0</h4>
+                <p class="kpi-label">Active Hotspots</p>
+                <small class="text-muted">High activity areas</small>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value text-secondary" id="patrolCoverage">0%</h4>
+                <p class="kpi-label">Patrol Coverage</p>
+                <small class="text-muted">Area coverage</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Operational View -->
+    <div class="row">
+        <!-- Interactive Incident Map -->
+        <div class="col-lg-8">
+            <div class="chart-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Real-time Incident Map</h5>
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="mapView" id="incidents" checked>
+                        <label class="btn btn-outline-primary btn-sm" for="incidents">Incidents</label>
+                        
+                        <input type="radio" class="btn-check" name="mapView" id="hotspots">
+                        <label class="btn btn-outline-primary btn-sm" for="hotspots">Hotspots</label>
+                        
+                        <input type="radio" class="btn-check" name="mapView" id="patrols">
+                        <label class="btn btn-outline-primary btn-sm" for="patrols">Patrols</label>
+                    </div>
+                </div>
+                <div id="tacticalMap" style="height: 500px; border-radius: 10px;"></div>
+            </div>
+        </div>
+        
+        <!-- Current Shift Status -->
+        <div class="col-lg-4">
+            <div class="chart-container">
+                <h5>Current Shift Status</h5>
+                <div id="shiftStatus" style="height: 200px;">
+                    <canvas id="shiftChart"></canvas>
+                </div>
+                
+                <h6 class="mt-4">Resource Allocation</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Unit</th>
+                                <th>Status</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resourceTable">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time-based Analysis -->
+    <div class="row">
+        <!-- Hourly Incident Patterns -->
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5>24-Hour Incident Patterns</h5>
+                <div style="height: 300px;">
+                    <canvas id="hourlyPatternsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Crime Type Distribution -->
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5>Crime Type Distribution (Last 7 Days)</h5>
+                <div style="height: 300px;">
+                    <canvas id="crimeTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Performance -->
+    <div class="row">
+        <!-- Response Time Trends -->
+        <div class="col-lg-8">
+            <div class="chart-container">
+                <h5>Response Time Performance</h5>
+                <div style="height: 300px;">
+                    <canvas id="responseTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Priority Queue -->
+        <div class="col-lg-4">
+            <div class="chart-container">
+                <h5>Priority Incident Queue</h5>
+                <div id="priorityQueue" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let tacticalMap, shiftChart, hourlyChart, crimeTypeChart, responseChart;
+let incidentMarkers = [];
+
+// Initialize tactical dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTacticalDashboard();
+    loadTacticalData();
+    
+    // Auto-refresh every 5 minutes
+    setInterval(loadTacticalData, 300000);
+    
+    // Event listeners
+    document.getElementById('refreshTactical').addEventListener('click', loadTacticalData);
+    document.querySelectorAll('input[name="mapView"]').forEach(radio => {
+        radio.addEventListener('change', updateMapView);
+    });
+});
+
+async function initializeTacticalDashboard() {
+    // Initialize tactical map
+    tacticalMap = L.map('tacticalMap').setView([53.4808, -2.2426], 12); // Manchester center
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(tacticalMap);
+    
+    // Add map controls
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'info legend');
+        div.innerHTML = `
+            <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                <h6>Incident Priority</h6>
+                <div><i style="background: #dc3545; width: 12px; height: 12px; display: inline-block; border-radius: 50%; margin-right: 5px;"></i> High Priority</div>
+                <div><i style="background: #ffc107; width: 12px; height: 12px; display: inline-block; border-radius: 50%; margin-right: 5px;"></i> Medium Priority</div>
+                <div><i style="background: #28a745; width: 12px; height: 12px; display: inline-block; border-radius: 50%; margin-right: 5px;"></i> Low Priority</div>
+            </div>
+        `;
+        return div;
+    };
+    legend.addTo(tacticalMap);
+}
+
+async function loadTacticalData() {
+    try {
+        // Update active incident count
+        document.getElementById('activeIncidentCount').textContent = Math.floor(Math.random() * 50) + 10;
+        
+        // Load active incidents
+        const activeIncidents = await apiCall('/api/tactical/active-incidents');
+        updateTacticalKPIs(activeIncidents);
+        updateIncidentMap(activeIncidents);
+        updatePriorityQueue(activeIncidents);
+        
+        // Load hotspots
+        const hotspots = await apiCall('/api/tactical/hotspots');
+        updateHotspotsDisplay(hotspots);
+        
+        // Load hourly patterns
+        const hourlyPatterns = await apiCall('/api/tactical/hourly-patterns');
+        updateHourlyPatternsChart(hourlyPatterns);
+        
+        // Update other charts with mock data
+        updateShiftStatusChart();
+        updateCrimeTypeChart();
+        updateResponseTimeChart();
+        updateResourceTable();
+        
+    } catch (error) {
+        console.error('Error loading tactical data:', error);
+        showError('activeIncidents', 'Failed to load tactical data');
+    }
+}
+
+function updateTacticalKPIs(incidents) {
+    // Calculate KPIs from incident data
+    const activeCount = incidents.filter(i => i.status === 'Open' || i.status === 'Under Investigation').length;
+    document.getElementById('activeIncidents').textContent = activeCount;
+    
+    // Mock data for other KPIs
+    document.getElementById('avgResponseTime').textContent = (Math.random() * 15 + 8).toFixed(1);
+    document.getElementById('officersOnDuty').textContent = Math.floor(Math.random() * 100) + 150;
+    document.getElementById('resolvedToday').textContent = Math.floor(Math.random() * 20) + 15;
+    document.getElementById('hotspotCount').textContent = Math.floor(Math.random() * 10) + 5;
+    document.getElementById('patrolCoverage').textContent = (Math.random() * 20 + 70).toFixed(0) + '%';
+}
+
+function updateIncidentMap(incidents) {
+    // Clear existing markers
+    incidentMarkers.forEach(marker => tacticalMap.removeLayer(marker));
+    incidentMarkers = [];
+    
+    incidents.forEach(incident => {
+        const priority = getPriorityLevel(incident.category);
+        const color = priority === 'high' ? '#dc3545' : priority === 'medium' ? '#ffc107' : '#28a745';
+        
+        const marker = L.circleMarker([incident.latitude, incident.longitude], {
+            radius: 8,
+            fillColor: color,
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(tacticalMap);
+        
+        marker.bindPopup(`
+            <div>
+                <strong>${incident.category}</strong><br>
+                <strong>Location:</strong> ${incident.location}<br>
+                <strong>Time:</strong> ${incident.time || 'Unknown'}<br>
+                <strong>Status:</strong> ${incident.status}<br>
+                <strong>Priority:</strong> <span class="badge bg-${priority === 'high' ? 'danger' : priority === 'medium' ? 'warning' : 'success'}">${priority}</span>
+            </div>
+        `);
+        
+        incidentMarkers.push(marker);
+    });
+}
+
+function updateHotspotsDisplay(hotspots) {
+    // Update hotspot visualization (called when hotspots radio is selected)
+    // This would overlay heat map on the tactical map
+    console.log('Hotspots data:', hotspots);
+}
+
+function updatePriorityQueue(incidents) {
+    const priorityQueue = document.getElementById('priorityQueue');
+    const highPriorityIncidents = incidents
+        .filter(i => getPriorityLevel(i.category) === 'high')
+        .slice(0, 10);
+    
+    priorityQueue.innerHTML = highPriorityIncidents.map(incident => `
+        <div class="card mb-2">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="card-title mb-1">${incident.category}</h6>
+                        <small class="text-muted">${incident.location}</small>
+                    </div>
+                    <span class="badge bg-danger">HIGH</span>
+                </div>
+                <small class="text-muted">${incident.time || 'Time unknown'} • ${incident.status}</small>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateHourlyPatternsChart(data) {
+    const ctx = document.getElementById('hourlyPatternsChart').getContext('2d');
+    
+    if (hourlyChart) {
+        hourlyChart.destroy();
+    }
+    
+    hourlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(item => item.hour === 'Unknown' ? 'N/A' : item.hour + ':00'),
+            datasets: [{
+                label: 'Incidents',
+                data: data.map(item => item.incident_count),
+                backgroundColor: chartColors.primary,
+                borderColor: chartColors.primary,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Incident Distribution by Hour'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Incidents'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Hour of Day'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateShiftStatusChart() {
+    const ctx = document.getElementById('shiftChart').getContext('2d');
+    
+    if (shiftChart) {
+        shiftChart.destroy();
+    }
+    
+    shiftChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Available', 'On Call', 'Off Duty', 'Break'],
+            datasets: [{
+                data: [45, 25, 20, 10],
+                backgroundColor: [chartColors.success, chartColors.warning, chartColors.danger, chartColors.secondary]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function updateCrimeTypeChart() {
+    const ctx = document.getElementById('crimeTypeChart').getContext('2d');
+    
+    if (crimeTypeChart) {
+        crimeTypeChart.destroy();
+    }
+    
+    const crimeTypes = ['Violent Crime', 'Burglary', 'Vehicle Crime', 'Drugs', 'ASB', 'Theft'];
+    const data = crimeTypes.map(() => Math.floor(Math.random() * 50) + 10);
+    
+    crimeTypeChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: crimeTypes,
+            datasets: [{
+                data: data,
+                backgroundColor: chartPalette.slice(0, crimeTypes.length)
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+}
+
+function updateResponseTimeChart() {
+    const ctx = document.getElementById('responseTimeChart').getContext('2d');
+    
+    if (responseChart) {
+        responseChart.destroy();
+    }
+    
+    // Generate mock response time data for last 7 days
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const responseData = days.map(() => Math.random() * 10 + 8);
+    const targetTime = 12; // Target response time
+    
+    responseChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: days,
+            datasets: [
+                {
+                    label: 'Average Response Time',
+                    data: responseData,
+                    borderColor: chartColors.primary,
+                    backgroundColor: chartColors.primary + '20',
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: 'Target (12 min)',
+                    data: days.map(() => targetTime),
+                    borderColor: chartColors.danger,
+                    borderDash: [5, 5],
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Response Time Trends (Minutes)'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Response Time (Minutes)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateResourceTable() {
+    const resourceTable = document.getElementById('resourceTable');
+    const units = [
+        { unit: 'Unit 1', status: 'Available', location: 'Central' },
+        { unit: 'Unit 2', status: 'On Call', location: 'North' },
+        { unit: 'Unit 3', status: 'Available', location: 'South' },
+        { unit: 'Unit 4', status: 'Break', location: 'East' },
+        { unit: 'Unit 5', status: 'On Call', location: 'West' }
+    ];
+    
+    resourceTable.innerHTML = units.map(unit => `
+        <tr>
+            <td>${unit.unit}</td>
+            <td><span class="badge bg-${unit.status === 'Available' ? 'success' : unit.status === 'On Call' ? 'warning' : 'secondary'}">${unit.status}</span></td>
+            <td>${unit.location}</td>
+        </tr>
+    `).join('');
+}
+
+function updateMapView() {
+    const selectedView = document.querySelector('input[name="mapView"]:checked').id;
+    
+    // This would switch between different map overlays
+    console.log('Switching to view:', selectedView);
+    
+    if (selectedView === 'hotspots') {
+        // Show hotspot heat map
+    } else if (selectedView === 'patrols') {
+        // Show patrol routes and current positions
+    } else {
+        // Show incident markers (default)
+    }
+}
+
+function getPriorityLevel(category) {
+    const highPriority = ['Violent Crime', 'Robbery', 'Weapons'];
+    const mediumPriority = ['Burglary', 'Vehicle Crime', 'Drugs'];
+    
+    if (highPriority.some(p => category.toLowerCase().includes(p.toLowerCase()))) {
+        return 'high';
+    } else if (mediumPriority.some(p => category.toLowerCase().includes(p.toLowerCase()))) {
+        return 'medium';
+    }
+    return 'low';
+}
+</script>
+{% endblock %}

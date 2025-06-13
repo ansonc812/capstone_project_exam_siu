@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36203.30 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "capstone project exam", "capstone project exam.pyproj", "{71AF6273-EA8A-48C7-B719-B2D3C532ACBE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{71AF6273-EA8A-48C7-B719-B2D3C532ACBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71AF6273-EA8A-48C7-B719-B2D3C532ACBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {363BC96B-2FCB-49DC-9176-C23751453867}
+	EndGlobalSection
+EndGlobal

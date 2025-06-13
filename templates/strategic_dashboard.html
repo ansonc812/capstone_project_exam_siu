@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+
+{% block title %}Strategic Dashboard - UK Crime Analysis{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1><i class="fas fa-chart-line me-3"></i>Strategic Dashboard</h1>
+                <p class="lead">Executive Crime Overview & Resource Planning</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <!-- Filter Panel -->
+    <div class="row">
+        <div class="col-12">
+            <div class="filter-panel">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="timeRangeSelect" class="form-label">Time Period</label>
+                        <select class="form-select" id="timeRangeSelect">
+                            <option value="12">Last 12 Months</option>
+                            <option value="24">Last 24 Months</option>
+                            <option value="6">Last 6 Months</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="regionSelect" class="form-label">Region Filter</label>
+                        <select class="form-select" id="regionSelect">
+                            <option value="all">All Regions</option>
+                            <option value="London">London</option>
+                            <option value="North West">North West</option>
+                            <option value="West Midlands">West Midlands</option>
+                            <option value="Yorkshire">Yorkshire</option>
+                            <option value="Scotland">Scotland</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="severityFilter" class="form-label">Crime Severity</label>
+                        <select class="form-select" id="severityFilter">
+                            <option value="all">All Severities</option>
+                            <option value="high">High Severity (4-5)</option>
+                            <option value="medium">Medium Severity (3)</option>
+                            <option value="low">Low Severity (1-2)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-primary w-100" id="refreshData">
+                            <i class="fas fa-sync me-2"></i>Refresh Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Cards Row -->
+    <div class="row">
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value" id="totalCrimes">0</h4>
+                <p class="kpi-label">Total Crime Incidents</p>
+                <small class="text-muted">Last 12 months</small>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value" id="resolutionRate">0%</h4>
+                <p class="kpi-label">Case Resolution Rate</p>
+                <small class="text-muted">Closed vs Total Cases</small>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value" id="avgCrimeRate">0</h4>
+                <p class="kpi-label">Avg Crime Rate</p>
+                <small class="text-muted">Per 1,000 population</small>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card">
+                <h4 class="kpi-value" id="totalForces">0</h4>
+                <p class="kpi-label">Police Forces</p>
+                <small class="text-muted">Across all regions</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Charts Row -->
+    <div class="row">
+        <!-- Regional Comparison Chart -->
+        <div class="col-lg-8">
+            <div class="chart-container">
+                <h5>Regional Crime Comparison</h5>
+                <div style="height: 400px;">
+                    <canvas id="regionalComparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- UK Map Overview -->
+        <div class="col-lg-4">
+            <div class="chart-container">
+                <h5>UK Crime Rate Map</h5>
+                <div id="ukMap" class="map-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trends and Performance Row -->
+    <div class="row">
+        <!-- Crime Trends Over Time -->
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5>Crime Trends Over Time</h5>
+                <div style="height: 300px;">
+                    <canvas id="trendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Budget vs Performance Scatter -->
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5>Budget Efficiency Analysis</h5>
+                <div style="height: 300px;">
+                    <canvas id="budgetEfficiencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="chart-container">
+                <h5>Police Force Performance Rankings</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped" id="performanceTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Police Force</th>
+                                <th>Region</th>
+                                <th>Total Crimes</th>
+                                <th>Resolution Rate</th>
+                                <th>Crime Rate per 1,000</th>
+                                <th>Budget (£M)</th>
+                                <th>Officers</th>
+                                <th>Efficiency Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performanceTableBody">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let regionalChart, trendsChart, budgetChart, ukMap;
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDashboard();
+    loadStrategicData();
+    
+    // Event listeners
+    document.getElementById('refreshData').addEventListener('click', loadStrategicData);
+});
+
+async function initializeDashboard() {
+    // Initialize UK Map
+    ukMap = L.map('ukMap').setView([54.5, -2.5], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(ukMap);
+}
+
+async function loadStrategicData() {
+    try {
+        // Show loading state
+        showLoading('totalCrimes');
+        
+        // Load overview data
+        const overviewData = await apiCall('/api/strategic/overview');
+        updateKPIs(overviewData);
+        
+        // Load regional comparison
+        const regionalData = await apiCall('/api/strategic/regional-comparison');
+        updateRegionalChart(regionalData);
+        updatePerformanceTable(regionalData);
+        updateUKMap(regionalData);
+        
+        // Load trends data
+        const trendsData = await apiCall('/api/strategic/trends');
+        updateTrendsChart(trendsData);
+        
+        // Update budget efficiency chart
+        updateBudgetEfficiencyChart(regionalData);
+        
+    } catch (error) {
+        console.error('Error loading strategic data:', error);
+        showError('totalCrimes', 'Failed to load dashboard data');
+    }
+}
+
+function updateKPIs(data) {
+    document.getElementById('totalCrimes').textContent = formatNumber(data.total_crimes);
+    document.getElementById('resolutionRate').textContent = formatPercentage(data.resolution_rate);
+    
+    // Calculate average crime rate
+    const avgCrimeRate = data.regions.reduce((sum, region) => sum + region.crime_rate_per_1000, 0) / data.regions.length;
+    document.getElementById('avgCrimeRate').textContent = avgCrimeRate.toFixed(1);
+    document.getElementById('totalForces').textContent = data.regions.length;
+}
+
+function updateRegionalChart(data) {
+    const ctx = document.getElementById('regionalComparisonChart').getContext('2d');
+    
+    if (regionalChart) {
+        regionalChart.destroy();
+    }
+    
+    regionalChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(item => item.city),
+            datasets: [
+                {
+                    label: 'Crime Rate per 1,000',
+                    data: data.map(item => item.crime_rate_per_1000),
+                    backgroundColor: chartColors.primary,
+                    borderColor: chartColors.primary,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Resolution Rate (%)',
+                    data: data.map(item => item.resolution_rate),
+                    backgroundColor: chartColors.success,
+                    borderColor: chartColors.success,
+                    borderWidth: 1,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Crime Rate per 1,000'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Resolution Rate (%)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Crime Rate vs Resolution Rate by City'
+                },
+                legend: {
+                    display: true
+                }
+            }
+        }
+    });
+}
+
+function updateTrendsChart(data) {
+    const ctx = document.getElementById('trendsChart').getContext('2d');
+    
+    if (trendsChart) {
+        trendsChart.destroy();
+    }
+    
+    trendsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(item => item.month),
+            datasets: [{
+                label: 'Total Crimes',
+                data: data.map(item => item.total_crimes),
+                borderColor: chartColors.primary,
+                backgroundColor: chartColors.primary + '20',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Crime Trends'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Number of Crimes'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateBudgetEfficiencyChart(data) {
+    const ctx = document.getElementById('budgetEfficiencyChart').getContext('2d');
+    
+    if (budgetChart) {
+        budgetChart.destroy();
+    }
+    
+    budgetChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Police Forces',
+                data: data.map(item => ({
+                    x: item.budget_millions,
+                    y: item.resolution_rate,
+                    city: item.city
+                })),
+                backgroundColor: chartColors.warning,
+                borderColor: chartColors.warning,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Budget vs Resolution Rate Efficiency'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.city}: £${context.parsed.x}M budget, ${context.parsed.y}% resolution rate`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Budget (£ Millions)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Resolution Rate (%)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updatePerformanceTable(data) {
+    const tbody = document.getElementById('performanceTableBody');
+    tbody.innerHTML = '';
+    
+    // Sort by resolution rate descending
+    const sortedData = [...data].sort((a, b) => b.resolution_rate - a.resolution_rate);
+    
+    sortedData.forEach((item, index) => {
+        const efficiency = ((item.resolution_rate / 100) * (1 / item.crime_rate_per_1000) * 100).toFixed(1);
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><span class="badge bg-primary">${index + 1}</span></td>
+            <td>${item.force}</td>
+            <td>${item.region}</td>
+            <td>${formatNumber(item.total_crimes)}</td>
+            <td>${formatPercentage(item.resolution_rate)}</td>
+            <td>${item.crime_rate_per_1000}</td>
+            <td>£${item.budget_millions}M</td>
+            <td>${formatNumber(item.officer_count)}</td>
+            <td><span class="badge bg-${efficiency > 50 ? 'success' : efficiency > 25 ? 'warning' : 'danger'}">${efficiency}</span></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updateUKMap(data) {
+    // Clear existing markers
+    ukMap.eachLayer(function(layer) {
+        if (layer instanceof L.Marker) {
+            ukMap.removeLayer(layer);
+        }
+    });
+    
+    // Add markers for each city
+    data.forEach(item => {
+        // You would need to add city coordinates to your data
+        // For demo, using approximate coordinates
+        const coords = getCityCoordinates(item.city);
+        if (coords) {
+            const marker = L.marker(coords).addTo(ukMap);
+            marker.bindPopup(`
+                <strong>${item.city}</strong><br>
+                Crime Rate: ${item.crime_rate_per_1000} per 1,000<br>
+                Resolution Rate: ${formatPercentage(item.resolution_rate)}<br>
+                Total Crimes: ${formatNumber(item.total_crimes)}
+            `);
+        }
+    });
+}
+
+function getCityCoordinates(cityName) {
+    const coordinates = {
+        'London': [51.5074, -0.1278],
+        'Manchester': [53.4808, -2.2426],
+        'Birmingham': [52.4862, -1.8904],
+        'Leeds': [53.8008, -1.5491],
+        'Glasgow': [55.8642, -4.2518],
+        'Liverpool': [53.4084, -2.9916],
+        'Newcastle': [54.9783, -1.6178],
+        'Sheffield': [53.3811, -1.4701],
+        'Bristol': [51.4545, -2.5879],
+        'Cardiff': [51.4816, -3.1791]
+    };
+    return coordinates[cityName];
+}
+</script>
+{% endblock %}
