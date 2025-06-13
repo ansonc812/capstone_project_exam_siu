@@ -1,0 +1,11 @@
+city,median_income_gbp,unemployment_rate_percent,education_university_percent,deprivation_index,housing_cost_index,crime_concern_rating
+London,42500,3.5,54.2,14.9,151.2,6.8
+Manchester,31200,4.9,41.2,26.3,102.1,5.9
+Birmingham,29600,5.8,38.1,29.7,94.2,6.2
+Leeds,30400,4.6,45.1,22.9,95.1,5.4
+Glasgow,28600,5.9,43.6,29.1,84.3,6.1
+Liverpool,27800,6.2,39.8,31.2,88.7,6.5
+Newcastle,26900,5.7,42.3,28.6,82.4,5.8
+Sheffield,28200,5.4,41.7,25.8,86.9,5.6
+Bristol,35200,4.1,48.9,18.7,118.3,5.2
+Cardiff,29800,5.1,44.2,24.1,91.5,5.7
