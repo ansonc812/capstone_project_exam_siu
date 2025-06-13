@@ -37,6 +37,8 @@ instance/
 # IDE
 .vscode/
 .idea/
+.claude/
+.vs/
 *.swp
 *.swo
 *~
