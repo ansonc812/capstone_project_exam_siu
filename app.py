@@ -1,6 +1,6 @@
 """
-Flask Backend Application for UK Crime Analysis Dashboards
-Supports Strategic, Tactical, and Analytical dashboards
+Flask Backend Application for London Crime Analysis Dashboards
+Supports Strategic, Tactical, and Analytical dashboards focused on London
 """
 
 from flask import Flask, render_template, jsonify, request
@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///uk_crime_analysis.db'  # Using SQLite for simplicity
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///london_crime_analysis.db'  # Using SQLite for simplicity
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
@@ -167,20 +167,20 @@ def strategic_overview():
         
         resolution_rate = (resolved_crimes / total_crimes * 100) if total_crimes > 0 else 0
         
-        # Get regional breakdown
+        # Get London borough breakdown
         regional_data = db.session.query(
-            City.region,
+            City.city_name.label('borough'),
             func.count(CrimeIncident.incident_id).label('total_crimes'),
-            func.sum(City.population).label('total_population')
+            City.population.label('total_population')
         ).join(Location, City.city_id == Location.city_id)\
          .join(CrimeIncident, Location.location_id == CrimeIncident.location_id)\
-         .group_by(City.region).all()
+         .group_by(City.city_name, City.population).all()
         
-        regions = []
-        for region, crimes, population in regional_data:
+        boroughs = []
+        for borough, crimes, population in regional_data:
             crime_rate = (crimes / population * 1000) if population > 0 else 0
-            regions.append({
-                'region': region,
+            boroughs.append({
+                'borough': borough,
                 'total_crimes': crimes,
                 'population': population,
                 'crime_rate_per_1000': round(crime_rate, 2)
@@ -192,49 +192,38 @@ def strategic_overview():
                 'total_crimes': total_crimes,
                 'resolved_crimes': resolved_crimes,
                 'resolution_rate': round(resolution_rate, 2),
-                'regions': regions
+                'boroughs': boroughs
             }
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/strategic/regional-comparison')
-def strategic_regional_comparison():
-    """Regional crime comparison data"""
+@app.route('/api/strategic/borough-comparison')
+def strategic_borough_comparison():
+    """London borough crime comparison data"""
     try:
-        # Get data for last 12 months
-        cutoff_date = datetime.now() - timedelta(days=365)
-        
+        # Get London borough data from your real dataset
         query = db.session.query(
             City.city_name,
-            City.region,
-            PoliceForce.force_name,
             func.count(CrimeIncident.incident_id).label('total_crimes'),
-            func.count(func.nullif(CrimeIncident.status == 'Closed', False)).label('resolved_crimes'),
-            City.population,
-            PoliceForce.budget_millions,
-            PoliceForce.officer_count
+            func.avg(CrimeCategory.severity_level).label('avg_severity'),
+            City.population
         ).join(Location, City.city_id == Location.city_id)\
          .join(CrimeIncident, Location.location_id == CrimeIncident.location_id)\
-         .join(PoliceForce, City.force_id == PoliceForce.force_id)\
-         .filter(CrimeIncident.incident_date >= cutoff_date.date())\
-         .group_by(City.city_id, City.city_name, City.region, PoliceForce.force_name, City.population, PoliceForce.budget_millions, PoliceForce.officer_count)\
+         .join(CrimeCategory, CrimeIncident.category_id == CrimeCategory.category_id)\
+         .group_by(City.city_id, City.city_name, City.population)\
          .all()
         
         results = []
         for row in query:
-            resolution_rate = (row.resolved_crimes / row.total_crimes * 100) if row.total_crimes > 0 else 0
-            crime_rate = (row.total_crimes / row.population * 1000) if row.population > 0 else 0
+            crime_rate = (row.total_crimes / row.population * 1000) if row.population and row.population > 0 else 0
             
             results.append({
-                'city': row.city_name,
-                'region': row.region,
-                'force': row.force_name,
+                'borough': row.city_name,
                 'total_crimes': row.total_crimes,
-                'resolution_rate': round(resolution_rate, 2),
                 'crime_rate_per_1000': round(crime_rate, 2),
-                'budget_millions': row.budget_millions,
-                'officer_count': row.officer_count
+                'avg_severity': round(row.avg_severity, 2) if row.avg_severity else 0,
+                'population': row.population or 0
             })
         
         return jsonify({'success': True, 'data': results})
@@ -257,6 +246,31 @@ def strategic_trends():
         trend_data = [{'month': month, 'total_crimes': count} for month, count in trends]
         
         return jsonify({'success': True, 'data': trend_data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/strategic/crime-categories')
+def strategic_crime_categories():
+    """Crime distribution by category for London"""
+    try:
+        # Get crime distribution by category
+        categories = db.session.query(
+            CrimeCategory.category_name,
+            CrimeCategory.severity_level,
+            func.count(CrimeIncident.incident_id).label('total_crimes')
+        ).join(CrimeIncident, CrimeCategory.category_id == CrimeIncident.category_id)\
+         .group_by(CrimeCategory.category_id, CrimeCategory.category_name, CrimeCategory.severity_level)\
+         .order_by(func.count(CrimeIncident.incident_id).desc()).all()
+        
+        category_data = []
+        for category in categories:
+            category_data.append({
+                'category': category.category_name,
+                'severity_level': category.severity_level,
+                'total_crimes': category.total_crimes
+            })
+        
+        return jsonify({'success': True, 'data': category_data})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

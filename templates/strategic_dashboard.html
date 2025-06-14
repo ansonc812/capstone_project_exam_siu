@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Strategic Dashboard - UK Crime Analysis{% endblock %}
+{% block title %}Strategic Dashboard - London Crime Analysis{% endblock %}
 
 {% block content %}
 <div class="dashboard-header">
@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-12">
                 <h1><i class="fas fa-chart-line me-3"></i>Strategic Dashboard</h1>
-                <p class="lead">Executive Crime Overview & Resource Planning</p>
+                <p class="lead">London Executive Crime Overview & Resource Planning</p>
             </div>
         </div>
     </div>
@@ -29,14 +29,14 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label for="regionSelect" class="form-label">Region Filter</label>
-                        <select class="form-select" id="regionSelect">
-                            <option value="all">All Regions</option>
-                            <option value="London">London</option>
-                            <option value="North West">North West</option>
-                            <option value="West Midlands">West Midlands</option>
-                            <option value="Yorkshire">Yorkshire</option>
-                            <option value="Scotland">Scotland</option>
+                        <label for="boroughSelect" class="form-label">Borough Filter</label>
+                        <select class="form-select" id="boroughSelect">
+                            <option value="all">All Boroughs</option>
+                            <option value="Westminster">Westminster</option>
+                            <option value="Camden">Camden</option>
+                            <option value="Islington">Islington</option>
+                            <option value="Tower Hamlets">Tower Hamlets</option>
+                            <option value="Southwark">Southwark</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -86,7 +86,7 @@
             <div class="kpi-card">
                 <h4 class="kpi-value" id="totalForces">0</h4>
                 <p class="kpi-label">Police Forces</p>
-                <small class="text-muted">Across all regions</small>
+                <small class="text-muted">Across London boroughs</small>
             </div>
         </div>
     </div>
@@ -96,7 +96,7 @@
         <!-- Regional Comparison Chart -->
         <div class="col-lg-8">
             <div class="chart-container">
-                <h5>Regional Crime Comparison</h5>
+                <h5>London Borough Crime Comparison</h5>
                 <div style="height: 400px;">
                     <canvas id="regionalComparisonChart"></canvas>
                 </div>
@@ -106,7 +106,7 @@
         <!-- UK Map Overview -->
         <div class="col-lg-4">
             <div class="chart-container">
-                <h5>UK Crime Rate Map</h5>
+                <h5>London Crime Rate Map</h5>
                 <div id="ukMap" class="map-container"></div>
             </div>
         </div>
@@ -139,20 +139,18 @@
     <div class="row">
         <div class="col-12">
             <div class="chart-container">
-                <h5>Police Force Performance Rankings</h5>
+                <h5>London Borough Crime Analysis</h5>
                 <div class="table-responsive">
                     <table class="table table-striped" id="performanceTable">
                         <thead class="table-dark">
                             <tr>
                                 <th>Rank</th>
-                                <th>Police Force</th>
-                                <th>Region</th>
+                                <th>Borough</th>
                                 <th>Total Crimes</th>
-                                <th>Resolution Rate</th>
                                 <th>Crime Rate per 1,000</th>
-                                <th>Budget (£M)</th>
-                                <th>Officers</th>
-                                <th>Efficiency Score</th>
+                                <th>Avg Severity</th>
+                                <th>Population</th>
+                                <th>Safety Score</th>
                             </tr>
                         </thead>
                         <tbody id="performanceTableBody">
@@ -183,8 +181,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function initializeDashboard() {
-    // Initialize UK Map
-    ukMap = L.map('ukMap').setView([54.5, -2.5], 6);
+    // Initialize London Map
+    ukMap = L.map('ukMap').setView([51.5074, -0.1278], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(ukMap);
@@ -199,8 +197,8 @@ async function loadStrategicData() {
         const overviewData = await apiCall('/api/strategic/overview');
         updateKPIs(overviewData);
         
-        // Load regional comparison
-        const regionalData = await apiCall('/api/strategic/regional-comparison');
+        // Load borough comparison
+        const regionalData = await apiCall('/api/strategic/borough-comparison');
         updateRegionalChart(regionalData);
         updatePerformanceTable(regionalData);
         updateUKMap(regionalData);
@@ -223,9 +221,9 @@ function updateKPIs(data) {
     document.getElementById('resolutionRate').textContent = formatPercentage(data.resolution_rate);
     
     // Calculate average crime rate
-    const avgCrimeRate = data.regions.reduce((sum, region) => sum + region.crime_rate_per_1000, 0) / data.regions.length;
+    const avgCrimeRate = data.boroughs.reduce((sum, borough) => sum + borough.crime_rate_per_1000, 0) / data.boroughs.length;
     document.getElementById('avgCrimeRate').textContent = avgCrimeRate.toFixed(1);
-    document.getElementById('totalForces').textContent = data.regions.length;
+    document.getElementById('totalForces').textContent = data.boroughs.length;
 }
 
 function updateRegionalChart(data) {
@@ -238,7 +236,7 @@ function updateRegionalChart(data) {
     regionalChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: data.map(item => item.city),
+            labels: data.map(item => item.borough),
             datasets: [
                 {
                     label: 'Crime Rate per 1,000',
@@ -248,10 +246,10 @@ function updateRegionalChart(data) {
                     borderWidth: 1
                 },
                 {
-                    label: 'Resolution Rate (%)',
-                    data: data.map(item => item.resolution_rate),
-                    backgroundColor: chartColors.success,
-                    borderColor: chartColors.success,
+                    label: 'Average Severity',
+                    data: data.map(item => item.avg_severity),
+                    backgroundColor: chartColors.warning,
+                    borderColor: chartColors.warning,
                     borderWidth: 1,
                     yAxisID: 'y1'
                 }
@@ -280,7 +278,7 @@ function updateRegionalChart(data) {
                     position: 'right',
                     title: {
                         display: true,
-                        text: 'Resolution Rate (%)'
+                        text: 'Average Severity (1-5)'
                     },
                     grid: {
                         drawOnChartArea: false,
@@ -290,7 +288,7 @@ function updateRegionalChart(data) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Crime Rate vs Resolution Rate by City'
+                    text: 'Crime Rate vs Severity by London Borough'
                 },
                 legend: {
                     display: true

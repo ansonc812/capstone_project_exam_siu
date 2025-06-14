@@ -1,8 +1,8 @@
-# Physical Entity Relationship Diagram (ERD)
-## UK Crime Analysis Database
+# London Crime Analysis System - Physical Entity Relationship Diagram
 
-### Entity Overview
-The database contains **10 entities** (exceeding the minimum 8 requirement) designed to support comprehensive crime analysis across strategic, tactical, and analytical levels.
+## Database Schema Overview
+
+The London Crime Analysis Dashboard System employs a relational database design with **8 core entities** optimized for crime data analysis, geographic mapping, and multi-level dashboard reporting. The schema follows third normal form (3NF) principles to ensure data integrity while maintaining query performance for real-time dashboard operations.
 
 ### Core Entities
 
