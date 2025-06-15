@@ -61,8 +61,9 @@
         <!-- Crime Map -->
         <div class="col-lg-8">
             <div class="chart-container">
-                <h5>Crime Incident Map</h5>
+                <h5>Crime Incident Heatmap</h5>
                 <div id="crimeMap" style="height: 500px;"></div>
+                <small class="text-muted">Red areas indicate higher crime density. Click markers for incident details.</small>
             </div>
         </div>
         
@@ -107,12 +108,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet Heatmap Plugin -->
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 let crimeMap;
 let incidentMarkers = [];
+let heatmapLayer = null;
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
@@ -195,19 +199,51 @@ function updateIncidentsList(data) {
 }
 
 function updateIncidentsMap(data) {
+    // Clear existing heatmap layer
+    if (heatmapLayer) {
+        crimeMap.removeLayer(heatmapLayer);
+    }
+    
     // Clear existing markers
     incidentMarkers.forEach(marker => crimeMap.removeLayer(marker));
     incidentMarkers = [];
     
-    // Add incident markers (show first 200 to avoid cluttering)
-    data.slice(0, 200).forEach(incident => {
+    if (data.length === 0) {
+        return;
+    }
+    
+    // Prepare heatmap data - [lat, lng, intensity]
+    const heatmapData = data.map(incident => [
+        incident.lat, 
+        incident.lng, 
+        0.8 // Base intensity
+    ]);
+    
+    // Create heatmap layer
+    heatmapLayer = L.heatLayer(heatmapData, {
+        radius: 25,
+        blur: 20,
+        maxZoom: 18,
+        max: 1.0,
+        gradient: {
+            0.0: 'blue',
+            0.2: 'cyan', 
+            0.4: 'lime',
+            0.6: 'yellow',
+            0.8: 'orange',
+            1.0: 'red'
+        }
+    }).addTo(crimeMap);
+    
+    // Add a few sample markers for reference (show first 20)
+    data.slice(0, 20).forEach(incident => {
         const marker = L.circleMarker([incident.lat, incident.lng], {
-            radius: 6,
+            radius: 4,
             fillColor: getCategoryColor(incident.category),
             color: '#ffffff',
             weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
+            opacity: 0.8,
+            fillOpacity: 0.6
         });
         
         marker.bindPopup(`
@@ -221,10 +257,10 @@ function updateIncidentsMap(data) {
         incidentMarkers.push(marker);
     });
     
-    // Fit map to show all markers
-    if (incidentMarkers.length > 0) {
-        const group = new L.featureGroup(incidentMarkers);
-        crimeMap.fitBounds(group.getBounds().pad(0.1));
+    // Fit map to show all data
+    if (heatmapData.length > 0) {
+        const bounds = L.latLngBounds(heatmapData.map(point => [point[0], point[1]]));
+        crimeMap.fitBounds(bounds.pad(0.1));
     }
 }
 

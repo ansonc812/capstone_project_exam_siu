@@ -171,16 +171,49 @@ def strategic_crime_categories():
 @app.route('/api/tactical/recent-incidents')
 def tactical_recent_incidents():
     """Recent crime incidents"""
-    # Sample incidents with London coordinates
-    all_incidents = [
+    # Enhanced sample incidents with more data points for better heatmap visualization
+    import random
+    
+    # Base incidents with real London locations
+    base_incidents = [
         {'crime_id': 'WM001', 'category': 'Theft from Person', 'street': 'Oxford Street', 'borough': 'Westminster', 'date': '2025-04-15', 'lat': 51.5155, 'lng': -0.1415},
         {'crime_id': 'WM002', 'category': 'Anti-social Behaviour', 'street': 'Regent Street', 'borough': 'Westminster', 'date': '2025-04-14', 'lat': 51.5125, 'lng': -0.1405},
+        {'crime_id': 'WM003', 'category': 'Theft from Person', 'street': 'Bond Street', 'borough': 'Westminster', 'date': '2025-04-13', 'lat': 51.5142, 'lng': -0.1494},
+        {'crime_id': 'WM004', 'category': 'Shoplifting', 'street': 'Oxford Circus', 'borough': 'Westminster', 'date': '2025-04-12', 'lat': 51.5154, 'lng': -0.1411},
         {'crime_id': 'CM001', 'category': 'Violent Crime', 'street': 'Camden High Street', 'borough': 'Camden', 'date': '2025-04-13', 'lat': 51.5390, 'lng': -0.1426},
         {'crime_id': 'CM002', 'category': 'Shoplifting', 'street': 'Tottenham Court Road', 'borough': 'Camden', 'date': '2025-04-12', 'lat': 51.5164, 'lng': -0.1308},
+        {'crime_id': 'CM003', 'category': 'Anti-social Behaviour', 'street': 'Camden Lock', 'borough': 'Camden', 'date': '2025-04-11', 'lat': 51.5441, 'lng': -0.1463},
         {'crime_id': 'SW001', 'category': 'Burglary', 'street': 'Borough High Street', 'borough': 'Southwark', 'date': '2025-04-11', 'lat': 51.5048, 'lng': -0.0878},
+        {'crime_id': 'SW002', 'category': 'Vehicle Crime', 'street': 'London Bridge', 'borough': 'Southwark', 'date': '2025-04-10', 'lat': 51.5074, 'lng': -0.0877},
         {'crime_id': 'TH001', 'category': 'Vehicle Crime', 'street': 'Commercial Road', 'borough': 'Tower Hamlets', 'date': '2025-04-10', 'lat': 51.5117, 'lng': -0.0432},
-        {'crime_id': 'CL001', 'category': 'Robbery', 'street': 'King William Street', 'borough': 'City of London', 'date': '2025-04-09', 'lat': 51.5130, 'lng': -0.0857}
+        {'crime_id': 'TH002', 'category': 'Theft from Person', 'street': 'Whitechapel Road', 'borough': 'Tower Hamlets', 'date': '2025-04-09', 'lat': 51.5196, 'lng': -0.0590},
+        {'crime_id': 'CL001', 'category': 'Robbery', 'street': 'King William Street', 'borough': 'City of London', 'date': '2025-04-09', 'lat': 51.5130, 'lng': -0.0857},
+        {'crime_id': 'CL002', 'category': 'Theft from Person', 'street': 'Bank Junction', 'borough': 'City of London', 'date': '2025-04-08', 'lat': 51.5133, 'lng': -0.0886}
     ]
+    
+    # Generate additional incidents around hotspots for better heatmap visualization
+    all_incidents = base_incidents.copy()
+    
+    # Add more incidents around each base location (within ~200m radius)
+    for base in base_incidents:
+        for i in range(random.randint(3, 8)):  # 3-8 additional incidents per base location
+            # Add small random offset to coordinates (roughly 100-300m)
+            lat_offset = random.uniform(-0.002, 0.002)
+            lng_offset = random.uniform(-0.003, 0.003)
+            
+            categories = ['Theft from Person', 'Anti-social Behaviour', 'Shoplifting', 'Vehicle Crime', 'Burglary']
+            category = random.choice(categories)
+            
+            incident_id = f"{base['crime_id']}-{i+1}"
+            all_incidents.append({
+                'crime_id': incident_id,
+                'category': category,
+                'street': f"{base['street']} Area",
+                'borough': base['borough'],
+                'date': f"2025-04-{random.randint(1,15):02d}",
+                'lat': base['lat'] + lat_offset,
+                'lng': base['lng'] + lng_offset
+            })
     
     # Apply filters
     borough_filter = request.args.get('borough', 'all')
