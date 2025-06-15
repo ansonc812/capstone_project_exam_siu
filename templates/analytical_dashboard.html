@@ -1,684 +1,158 @@
 {% extends "base.html" %}
 
-{% block title %}Analytical Dashboard - UK Crime Analysis{% endblock %}
+{% block title %}Analytical Dashboard - London Crime Analysis{% endblock %}
 
 {% block content %}
 <div class="dashboard-header">
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <h1><i class="fas fa-chart-area me-3"></i>Analytical Dashboard</h1>
-                <p class="lead">Crime Pattern Analysis & Investigation Support</p>
+                <h1><i class="fas fa-chart-bar me-3"></i>Analytical Dashboard</h1>
+                <p class="lead">London Crime Data Analysis & Insights</p>
             </div>
         </div>
     </div>
 </div>
 
 <div class="container-fluid">
-    <!-- Advanced Filter Panel -->
+    <!-- Analysis Charts Row -->
     <div class="row">
-        <div class="col-12">
-            <div class="filter-panel">
-                <div class="row">
-                    <div class="col-md-2">
-                        <label for="analysisType" class="form-label">Analysis Type</label>
-                        <select class="form-select" id="analysisType">
-                            <option value="correlation">Correlation Analysis</option>
-                            <option value="temporal">Temporal Patterns</option>
-                            <option value="geographic">Geographic Clustering</option>
-                            <option value="demographic">Demographic Analysis</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="dateRangeStart" class="form-label">Start Date</label>
-                        <input type="date" class="form-control" id="dateRangeStart">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="dateRangeEnd" class="form-label">End Date</label>
-                        <input type="date" class="form-control" id="dateRangeEnd">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="crimeCategories" class="form-label">Crime Categories</label>
-                        <select class="form-select" id="crimeCategories" multiple>
-                            <option value="violent-crime">Violent Crime</option>
-                            <option value="burglary">Burglary</option>
-                            <option value="vehicle-crime">Vehicle Crime</option>
-                            <option value="drugs">Drugs</option>
-                            <option value="theft">Theft</option>
-                            <option value="asb">Anti-social Behaviour</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="confidenceLevel" class="form-label">Confidence Level</label>
-                        <select class="form-select" id="confidenceLevel">
-                            <option value="95">95%</option>
-                            <option value="90">90%</option>
-                            <option value="85">85%</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">&nbsp;</label>
-                        <button class="btn btn-primary w-100" id="runAnalysis">
-                            <i class="fas fa-play me-2"></i>Run Analysis
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Analysis Results Summary -->
-    <div class="row">
-        <div class="col-lg-3 col-md-6">
-            <div class="kpi-card">
-                <h4 class="kpi-value text-info" id="correlationStrength">0.0</h4>
-                <p class="kpi-label">Strongest Correlation</p>
-                <small class="text-muted">Crime type relationship</small>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="kpi-card">
-                <h4 class="kpi-value text-warning" id="predictiveAccuracy">0%</h4>
-                <p class="kpi-label">Prediction Accuracy</p>
-                <small class="text-muted">Model performance</small>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="kpi-card">
-                <h4 class="kpi-value text-success" id="patternCount">0</h4>
-                <p class="kpi-label">Patterns Identified</p>
-                <small class="text-muted">Significant patterns</small>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="kpi-card">
-                <h4 class="kpi-value text-primary" id="dataPoints">0</h4>
-                <p class="kpi-label">Data Points</p>
-                <small class="text-muted">Records analyzed</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Analysis Section -->
-    <div class="row">
-        <!-- Correlation Matrix -->
+        <!-- Severity Analysis -->
         <div class="col-lg-6">
             <div class="chart-container">
-                <h5>Crime Type Correlation Matrix</h5>
-                <div id="correlationMatrix" style="height: 400px;"></div>
-            </div>
-        </div>
-        
-        <!-- Time Series Decomposition -->
-        <div class="col-lg-6">
-            <div class="chart-container">
-                <h5>Temporal Pattern Decomposition</h5>
+                <h5>Crime Severity Distribution</h5>
                 <div style="height: 400px;">
-                    <canvas id="timeSeriesChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Advanced Visualizations -->
-    <div class="row">
-        <!-- Geographic Cluster Analysis -->
-        <div class="col-lg-8">
-            <div class="chart-container">
-                <h5>Geographic Crime Clustering Analysis</h5>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="btn-group" role="group">
-                            <input type="radio" class="btn-check" name="clusterMethod" id="kmeans" checked>
-                            <label class="btn btn-outline-primary btn-sm" for="kmeans">K-Means</label>
-                            
-                            <input type="radio" class="btn-check" name="clusterMethod" id="dbscan">
-                            <label class="btn btn-outline-primary btn-sm" for="dbscan">DBSCAN</label>
-                            
-                            <input type="radio" class="btn-check" name="clusterMethod" id="hierarchical">
-                            <label class="btn btn-outline-primary btn-sm" for="hierarchical">Hierarchical</label>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center">
-                            <label for="clusterCount" class="form-label me-2 mb-0">Clusters:</label>
-                            <input type="range" class="form-range me-2" id="clusterCount" min="2" max="10" value="5">
-                            <span id="clusterCountValue">5</span>
-                        </div>
-                    </div>
-                </div>
-                <div id="clusterMap" style="height: 400px; border-radius: 10px;"></div>
-            </div>
-        </div>
-        
-        <!-- Statistical Analysis Panel -->
-        <div class="col-lg-4">
-            <div class="chart-container">
-                <h5>Statistical Summary</h5>
-                <div id="statisticalSummary">
-                    <div class="mb-3">
-                        <h6>Descriptive Statistics</h6>
-                        <table class="table table-sm">
-                            <tbody id="descriptiveStats">
-                                <!-- Populated by JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <h6>Correlation Coefficients</h6>
-                        <div id="topCorrelations">
-                            <!-- Populated by JavaScript -->
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h6>Significance Tests</h6>
-                        <div id="significanceTests">
-                            <!-- Populated by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Demographic Correlation Analysis -->
-    <div class="row">
-        <!-- Scatter Plot Matrix -->
-        <div class="col-lg-6">
-            <div class="chart-container">
-                <h5>Socioeconomic vs Crime Rate Analysis</h5>
-                <div style="height: 350px;">
-                    <canvas id="scatterPlotChart"></canvas>
+                    <canvas id="severityChart"></canvas>
                 </div>
             </div>
         </div>
         
-        <!-- Box Plot Analysis -->
+        <!-- Borough Comparison -->
         <div class="col-lg-6">
             <div class="chart-container">
-                <h5>Crime Distribution by Demographics</h5>
-                <div style="height: 350px;">
-                    <canvas id="boxPlotChart"></canvas>
+                <h5>Borough Crime Rate Analysis</h5>
+                <div style="height: 400px;">
+                    <canvas id="boroughComparisonChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Seasonal and Network Analysis -->
+    <!-- Detailed Analysis Tables Row -->
     <div class="row">
-        <!-- Seasonal Decomposition -->
+        <!-- Severity Analysis Table -->
         <div class="col-lg-6">
             <div class="chart-container">
-                <h5>Seasonal Crime Patterns</h5>
-                <div style="height: 300px;">
-                    <canvas id="seasonalChart"></canvas>
+                <h5>Crime Severity Breakdown</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped" id="severityTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Severity Level</th>
+                                <th>Total Crimes</th>
+                                <th>Percentage</th>
+                                <th>Main Categories</th>
+                            </tr>
+                        </thead>
+                        <tbody id="severityTableBody">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
         
-        <!-- Network Analysis -->
+        <!-- Borough Analysis Table -->
         <div class="col-lg-6">
             <div class="chart-container">
-                <h5>Crime Co-occurrence Network</h5>
-                <div id="networkDiagram" style="height: 300px;"></div>
+                <h5>Borough Statistical Analysis</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped" id="boroughAnalysisTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Borough</th>
+                                <th>Population</th>
+                                <th>Total Crimes</th>
+                                <th>Crime Rate</th>
+                                <th>Avg Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="boroughAnalysisTableBody">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Analysis Export and Reports -->
+    <!-- Summary Insights Row -->
     <div class="row">
         <div class="col-12">
             <div class="chart-container">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5>Analysis Reports & Export</h5>
-                    <div class="btn-group">
-                        <button class="btn btn-outline-primary" id="exportPDF">
-                            <i class="fas fa-file-pdf me-2"></i>Export PDF
-                        </button>
-                        <button class="btn btn-outline-success" id="exportExcel">
-                            <i class="fas fa-file-excel me-2"></i>Export Excel
-                        </button>
-                        <button class="btn btn-outline-info" id="exportData">
-                            <i class="fas fa-download me-2"></i>Export Data
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-8">
-                        <div id="analysisReport">
-                            <h6>Analysis Summary Report</h6>
-                            <div id="reportContent">
-                                <p class="text-muted">Run an analysis to generate a detailed report with findings and recommendations.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <h6>Quick Actions</h6>
-                        <div class="list-group">
-                            <button class="list-group-item list-group-item-action" id="saveAnalysis">
-                                <i class="fas fa-save me-2"></i>Save Current Analysis
-                            </button>
-                            <button class="list-group-item list-group-item-action" id="loadAnalysis">
-                                <i class="fas fa-folder-open me-2"></i>Load Saved Analysis
-                            </button>
-                            <button class="list-group-item list-group-item-action" id="shareAnalysis">
-                                <i class="fas fa-share me-2"></i>Share Analysis
-                            </button>
-                            <button class="list-group-item list-group-item-action" id="scheduleReport">
-                                <i class="fas fa-clock me-2"></i>Schedule Report
-                            </button>
-                        </div>
-                    </div>
+                <h5>Key Insights & Analysis Summary</h5>
+                <div id="insightsSummary" class="p-3">
+                    <!-- Insights will be populated by JavaScript -->
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
 
 {% block extra_js %}
 <script>
-let clusterMap, timeSeriesChart, scatterChart, boxPlotChart, seasonalChart;
-let analysisData = {};
+let severityChart, boroughComparisonChart;
 
-// Initialize analytical dashboard
+// Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
-    initializeAnalyticalDashboard();
     loadAnalyticalData();
-    
-    // Event listeners
-    document.getElementById('runAnalysis').addEventListener('click', runSelectedAnalysis);
-    document.getElementById('clusterCount').addEventListener('input', updateClusterCount);
-    document.querySelectorAll('input[name="clusterMethod"]').forEach(radio => {
-        radio.addEventListener('change', updateClusterAnalysis);
-    });
-    
-    // Export buttons
-    document.getElementById('exportPDF').addEventListener('click', exportToPDF);
-    document.getElementById('exportExcel').addEventListener('click', exportToExcel);
-    document.getElementById('exportData').addEventListener('click', exportData);
 });
-
-async function initializeAnalyticalDashboard() {
-    // Initialize cluster analysis map
-    clusterMap = L.map('clusterMap').setView([53.4808, -2.2426], 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(clusterMap);
-    
-    // Set default date range (last year)
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setFullYear(endDate.getFullYear() - 1);
-    
-    document.getElementById('dateRangeEnd').value = endDate.toISOString().split('T')[0];
-    document.getElementById('dateRangeStart').value = startDate.toISOString().split('T')[0];
-}
 
 async function loadAnalyticalData() {
     try {
-        // Load correlation data
-        const correlationData = await apiCall('/api/analytical/correlation-matrix');
-        updateCorrelationMatrix(correlationData);
+        // Load severity analysis
+        const severityData = await apiCall('/api/analytical/severity-analysis');
+        updateSeverityChart(severityData);
+        updateSeverityTable(severityData);
         
-        // Load demographic correlation
-        const demographicData = await apiCall('/api/analytical/demographic-correlation');
-        updateScatterPlot(demographicData);
-        updateDescriptiveStats(demographicData);
+        // Load borough comparison
+        const boroughData = await apiCall('/api/analytical/borough-comparison');
+        updateBoroughComparisonChart(boroughData);
+        updateBoroughAnalysisTable(boroughData);
         
-        // Load seasonal patterns
-        const seasonalData = await apiCall('/api/analytical/seasonal-patterns');
-        updateSeasonalChart(seasonalData);
-        
-        // Update KPIs
-        updateAnalyticalKPIs(correlationData, demographicData);
-        
-        // Initialize other visualizations
-        updateTimeSeriesDecomposition();
-        updateBoxPlotAnalysis();
-        updateNetworkDiagram(correlationData);
-        updateClusterAnalysis();
+        // Generate insights
+        generateInsights(severityData, boroughData);
         
     } catch (error) {
         console.error('Error loading analytical data:', error);
-        showError('correlationStrength', 'Failed to load analytical data');
+        showError('Failed to load analytical data');
     }
 }
 
-function updateAnalyticalKPIs(correlationData, demographicData) {
-    // Find strongest correlation
-    if (correlationData.length > 0) {
-        const maxCorrelation = Math.max(...correlationData.map(item => item.co_occurrence));
-        const normalizedCorr = (maxCorrelation / 100).toFixed(2); // Normalize for display
-        document.getElementById('correlationStrength').textContent = normalizedCorr;
+function updateSeverityChart(data) {
+    const ctx = document.getElementById('severityChart').getContext('2d');
+    
+    if (severityChart) {
+        severityChart.destroy();
     }
     
-    // Mock predictive accuracy
-    document.getElementById('predictiveAccuracy').textContent = (Math.random() * 20 + 75).toFixed(1) + '%';
-    
-    // Pattern count
-    document.getElementById('patternCount').textContent = correlationData.length;
-    
-    // Data points
-    const totalDataPoints = demographicData.reduce((sum, item) => sum + item.total_crimes, 0);
-    document.getElementById('dataPoints').textContent = formatNumber(totalDataPoints);
-}
-
-function updateCorrelationMatrix(data) {
-    // Create correlation matrix using D3.js
-    const container = d3.select('#correlationMatrix');
-    container.selectAll('*').remove();
-    
-    // Prepare data for heatmap
-    const crimeTypes = [...new Set(data.flatMap(d => [d.category1, d.category2]))];
-    const matrix = crimeTypes.map(type1 => 
-        crimeTypes.map(type2 => {
-            if (type1 === type2) return 1;
-            const correlation = data.find(d => 
-                (d.category1 === type1 && d.category2 === type2) ||
-                (d.category1 === type2 && d.category2 === type1)
-            );
-            return correlation ? correlation.co_occurrence / 100 : 0;
-        })
-    );
-    
-    const margin = {top: 50, right: 50, bottom: 50, left: 150};
-    const width = 400 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
-    
-    const svg = container.append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
-    
-    const colorScale = d3.scaleSequential(d3.interpolateRdYlBu)
-        .domain([0, 1]);
-    
-    const cellSize = Math.min(width, height) / crimeTypes.length;
-    
-    // Create cells
-    matrix.forEach((row, i) => {
-        row.forEach((value, j) => {
-            svg.append('rect')
-                .attr('x', j * cellSize)
-                .attr('y', i * cellSize)
-                .attr('width', cellSize)
-                .attr('height', cellSize)
-                .attr('fill', colorScale(value))
-                .attr('stroke', 'white')
-                .attr('stroke-width', 1);
-            
-            // Add text
-            svg.append('text')
-                .attr('x', j * cellSize + cellSize/2)
-                .attr('y', i * cellSize + cellSize/2)
-                .attr('text-anchor', 'middle')
-                .attr('dominant-baseline', 'middle')
-                .attr('fill', value > 0.5 ? 'white' : 'black')
-                .attr('font-size', '10px')
-                .text(value.toFixed(2));
-        });
-    });
-    
-    // Add labels
-    svg.selectAll('.row-label')
-        .data(crimeTypes)
-        .enter()
-        .append('text')
-        .attr('class', 'row-label')
-        .attr('x', -5)
-        .attr('y', (d, i) => i * cellSize + cellSize/2)
-        .attr('text-anchor', 'end')
-        .attr('dominant-baseline', 'middle')
-        .attr('font-size', '12px')
-        .text(d => d);
-    
-    svg.selectAll('.col-label')
-        .data(crimeTypes)
-        .enter()
-        .append('text')
-        .attr('class', 'col-label')
-        .attr('x', (d, i) => i * cellSize + cellSize/2)
-        .attr('y', -10)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '12px')
-        .attr('transform', (d, i) => `rotate(-45, ${i * cellSize + cellSize/2}, -10)`)
-        .text(d => d);
-}
-
-function updateScatterPlot(data) {
-    const ctx = document.getElementById('scatterPlotChart').getContext('2d');
-    
-    if (scatterChart) {
-        scatterChart.destroy();
-    }
-    
-    scatterChart = new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            datasets: [
-                {
-                    label: 'Income vs Crime Rate',
-                    data: data.map(item => ({
-                        x: item.median_income / 1000, // Convert to thousands
-                        y: item.crime_rate_per_1000,
-                        city: item.city
-                    })),
-                    backgroundColor: chartColors.primary,
-                    borderColor: chartColors.primary,
-                    pointRadius: 6
-                },
-                {
-                    label: 'Unemployment vs Crime Rate',
-                    data: data.map(item => ({
-                        x: item.unemployment_rate,
-                        y: item.crime_rate_per_1000,
-                        city: item.city
-                    })),
-                    backgroundColor: chartColors.warning,
-                    borderColor: chartColors.warning,
-                    pointRadius: 6
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Socioeconomic Factors vs Crime Rate'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.raw.city}: ${context.parsed.y} crimes per 1000`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Income (£000s) / Unemployment (%)'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Crime Rate per 1,000 Population'
-                    }
-                }
-            }
-        }
-    });
-}
-
-function updateTimeSeriesDecomposition() {
-    const ctx = document.getElementById('timeSeriesChart').getContext('2d');
-    
-    if (timeSeriesChart) {
-        timeSeriesChart.destroy();
-    }
-    
-    // Generate mock time series data with trend, seasonal, and noise components
-    const months = [];
-    const trend = [];
-    const seasonal = [];
-    const observed = [];
-    
-    for (let i = 0; i < 24; i++) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - (24 - i));
-        months.push(date.toLocaleDateString('en-GB', {year: 'numeric', month: 'short'}));
-        
-        const trendValue = 100 + i * 2 + Math.sin(i / 6) * 10;
-        const seasonalValue = 20 * Math.sin(i * Math.PI / 6);
-        const noise = (Math.random() - 0.5) * 20;
-        
-        trend.push(trendValue);
-        seasonal.push(seasonalValue);
-        observed.push(trendValue + seasonalValue + noise);
-    }
-    
-    timeSeriesChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: months,
-            datasets: [
-                {
-                    label: 'Observed',
-                    data: observed,
-                    borderColor: chartColors.primary,
-                    backgroundColor: chartColors.primary + '20',
-                    fill: false
-                },
-                {
-                    label: 'Trend',
-                    data: trend,
-                    borderColor: chartColors.success,
-                    backgroundColor: 'transparent',
-                    fill: false,
-                    borderDash: [5, 5]
-                },
-                {
-                    label: 'Seasonal',
-                    data: seasonal,
-                    borderColor: chartColors.warning,
-                    backgroundColor: 'transparent',
-                    fill: false,
-                    borderDash: [2, 2]
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Crime Time Series Decomposition'
-                }
-            },
-            scales: {
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Crime Incidents'
-                    }
-                }
-            }
-        }
-    });
-}
-
-function updateSeasonalChart(data) {
-    const ctx = document.getElementById('seasonalChart').getContext('2d');
-    
-    if (seasonalChart) {
-        seasonalChart.destroy();
-    }
-    
-    // Aggregate data by season
-    const seasonalData = data.reduce((acc, item) => {
-        if (!acc[item.season]) {
-            acc[item.season] = 0;
-        }
-        acc[item.season] += item.incident_count;
-        return acc;
-    }, {});
-    
-    const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
-    const counts = seasons.map(season => seasonalData[season] || 0);
-    
-    seasonalChart = new Chart(ctx, {
-        type: 'radar',
-        data: {
-            labels: seasons,
-            datasets: [{
-                label: 'Crime Incidents',
-                data: counts,
-                backgroundColor: chartColors.info + '30',
-                borderColor: chartColors.info,
-                pointBackgroundColor: chartColors.info,
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: chartColors.info
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Seasonal Crime Distribution'
-                }
-            },
-            scales: {
-                r: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-function updateBoxPlotAnalysis() {
-    // Mock box plot data - in real implementation, this would calculate quartiles
-    const ctx = document.getElementById('boxPlotChart').getContext('2d');
-    
-    if (boxPlotChart) {
-        boxPlotChart.destroy();
-    }
-    
-    const crimeTypes = ['Violent', 'Burglary', 'Vehicle', 'Drugs', 'Theft'];
-    const boxData = crimeTypes.map(type => ({
-        label: type,
-        min: Math.random() * 10,
-        q1: Math.random() * 20 + 10,
-        median: Math.random() * 20 + 30,
-        q3: Math.random() * 20 + 50,
-        max: Math.random() * 20 + 70
-    }));
-    
-    boxPlotChart = new Chart(ctx, {
+    severityChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: crimeTypes,
+            labels: data.map(item => `Severity ${item.severity_level}`),
             datasets: [{
-                label: 'Crime Rate Distribution',
-                data: boxData.map(d => d.median),
-                backgroundColor: chartPalette.slice(0, crimeTypes.length),
-                borderColor: chartPalette.slice(0, crimeTypes.length),
+                label: 'Number of Crimes',
+                data: data.map(item => item.total_crimes),
+                backgroundColor: [
+                    '#28a745', // Level 1-2 (Low)
+                    '#ffc107', // Level 3 (Medium) 
+                    '#fd7e14', // Level 4 (High)
+                    '#dc3545', // Level 5 (Very High)
+                ].slice(0, data.length),
+                borderColor: '#ffffff',
                 borderWidth: 1
             }]
         },
@@ -688,10 +162,74 @@ function updateBoxPlotAnalysis() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Crime Rate Distribution by Type'
+                    text: 'Crime Distribution by Severity Level'
+                },
+                legend: {
+                    display: false
                 }
             },
             scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Crimes'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateBoroughComparisonChart(data) {
+    const ctx = document.getElementById('boroughComparisonChart').getContext('2d');
+    
+    if (boroughComparisonChart) {
+        boroughComparisonChart.destroy();
+    }
+    
+    boroughComparisonChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Boroughs',
+                data: data.map(item => ({
+                    x: item.population / 1000, // Population in thousands
+                    y: item.crime_rate,
+                    borough: item.borough
+                })),
+                backgroundColor: '#3B82F6',
+                borderColor: '#1D4ED8',
+                pointRadius: 8,
+                pointHoverRadius: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Population vs Crime Rate Analysis'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.borough}: ${context.raw.y} crimes per 1,000 (Pop: ${Math.round(context.raw.x)}k)`;
+                        }
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Population (thousands)'
+                    }
+                },
                 y: {
                     title: {
                         display: true,
@@ -703,181 +241,127 @@ function updateBoxPlotAnalysis() {
     });
 }
 
-function updateNetworkDiagram(data) {
-    // Create network diagram using D3.js
-    const container = d3.select('#networkDiagram');
-    container.selectAll('*').remove();
+function updateSeverityTable(data) {
+    const tbody = document.getElementById('severityTableBody');
+    tbody.innerHTML = '';
     
-    const width = container.node().getBoundingClientRect().width;
-    const height = 300;
+    const totalCrimes = data.reduce((sum, item) => sum + item.total_crimes, 0);
     
-    const svg = container.append('svg')
-        .attr('width', width)
-        .attr('height', height);
-    
-    // Prepare network data
-    const nodes = [...new Set(data.flatMap(d => [d.category1, d.category2]))]
-        .map(id => ({id, group: 1}));
-    
-    const links = data.map(d => ({
-        source: d.category1,
-        target: d.category2,
-        value: d.co_occurrence
-    }));
-    
-    const simulation = d3.forceSimulation(nodes)
-        .force('link', d3.forceLink(links).id(d => d.id))
-        .force('charge', d3.forceManyBody().strength(-300))
-        .force('center', d3.forceCenter(width / 2, height / 2));
-    
-    const link = svg.append('g')
-        .selectAll('line')
-        .data(links)
-        .enter().append('line')
-        .attr('stroke', '#999')
-        .attr('stroke-width', d => Math.sqrt(d.value / 10));
-    
-    const node = svg.append('g')
-        .selectAll('circle')
-        .data(nodes)
-        .enter().append('circle')
-        .attr('r', 8)
-        .attr('fill', chartColors.primary)
-        .call(d3.drag()
-            .on('start', dragstarted)
-            .on('drag', dragged)
-            .on('end', dragended));
-    
-    const labels = svg.append('g')
-        .selectAll('text')
-        .data(nodes)
-        .enter().append('text')
-        .text(d => d.id.split('-').join(' '))
-        .attr('font-size', '10px')
-        .attr('text-anchor', 'middle');
-    
-    simulation.on('tick', () => {
-        link
-            .attr('x1', d => d.source.x)
-            .attr('y1', d => d.source.y)
-            .attr('x2', d => d.target.x)
-            .attr('y2', d => d.target.y);
+    data.forEach(item => {
+        const percentage = ((item.total_crimes / totalCrimes) * 100).toFixed(1);
+        const severityText = getSeverityText(item.severity_level);
+        const severityClass = getSeverityClass(item.severity_level);
         
-        node
-            .attr('cx', d => d.x)
-            .attr('cy', d => d.y);
-        
-        labels
-            .attr('x', d => d.x)
-            .attr('y', d => d.y + 20);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><span class="badge bg-${severityClass}">Level ${item.severity_level}</span> ${severityText}</td>
+            <td>${formatNumber(item.total_crimes)}</td>
+            <td>${percentage}%</td>
+            <td><small>${item.categories.slice(0, 3).join(', ')}</small></td>
+        `;
+        tbody.appendChild(row);
     });
-    
-    function dragstarted(event, d) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-    }
-    
-    function dragged(event, d) {
-        d.fx = event.x;
-        d.fy = event.y;
-    }
-    
-    function dragended(event, d) {
-        if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }
 }
 
-function updateDescriptiveStats(data) {
-    const stats = document.getElementById('descriptiveStats');
+function updateBoroughAnalysisTable(data) {
+    const tbody = document.getElementById('boroughAnalysisTableBody');
+    tbody.innerHTML = '';
     
-    const crimeRates = data.map(d => d.crime_rate_per_1000);
-    const mean = crimeRates.reduce((a, b) => a + b, 0) / crimeRates.length;
-    const variance = crimeRates.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / crimeRates.length;
-    const stdDev = Math.sqrt(variance);
+    // Sort by crime rate descending
+    const sortedData = [...data].sort((a, b) => b.crime_rate - a.crime_rate);
     
-    stats.innerHTML = `
-        <tr><td>Mean Crime Rate</td><td>${mean.toFixed(2)}</td></tr>
-        <tr><td>Std Deviation</td><td>${stdDev.toFixed(2)}</td></tr>
-        <tr><td>Min</td><td>${Math.min(...crimeRates).toFixed(2)}</td></tr>
-        <tr><td>Max</td><td>${Math.max(...crimeRates).toFixed(2)}</td></tr>
-    `;
-}
-
-function updateClusterAnalysis() {
-    // Mock cluster analysis visualization
-    // Clear existing markers
-    clusterMap.eachLayer(function(layer) {
-        if (layer instanceof L.Marker || layer instanceof L.CircleMarker) {
-            clusterMap.removeLayer(layer);
-        }
-    });
-    
-    const clusterCount = parseInt(document.getElementById('clusterCount').value);
-    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#800080', '#008000', '#ffc0cb'];
-    
-    // Generate mock cluster data
-    for (let cluster = 0; cluster < clusterCount; cluster++) {
-        const centerLat = 53.4808 + (Math.random() - 0.5) * 0.2;
-        const centerLng = -2.2426 + (Math.random() - 0.5) * 0.2;
-        const pointsInCluster = Math.floor(Math.random() * 20) + 5;
+    sortedData.forEach(item => {
+        const riskClass = item.crime_rate > 20 ? 'danger' : item.crime_rate > 15 ? 'warning' : 'success';
         
-        for (let i = 0; i < pointsInCluster; i++) {
-            const lat = centerLat + (Math.random() - 0.5) * 0.05;
-            const lng = centerLng + (Math.random() - 0.5) * 0.05;
-            
-            L.circleMarker([lat, lng], {
-                radius: 5,
-                fillColor: colors[cluster],
-                color: '#000',
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.7
-            }).addTo(clusterMap);
-        }
-    }
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${item.borough}</strong></td>
+            <td>${formatNumber(item.population)}</td>
+            <td>${formatNumber(item.total_crimes)}</td>
+            <td><span class="badge bg-${riskClass}">${item.crime_rate}</span></td>
+            <td>${item.avg_severity}</td>
+        `;
+        tbody.appendChild(row);
+    });
 }
 
-function updateClusterCount() {
-    const value = document.getElementById('clusterCount').value;
-    document.getElementById('clusterCountValue').textContent = value;
-    updateClusterAnalysis();
-}
-
-function runSelectedAnalysis() {
-    const analysisType = document.getElementById('analysisType').value;
-    console.log('Running analysis:', analysisType);
+function generateInsights(severityData, boroughData) {
+    const insightsDiv = document.getElementById('insightsSummary');
     
-    // Update report content based on analysis type
-    const reportContent = document.getElementById('reportContent');
-    reportContent.innerHTML = `
-        <div class="alert alert-info">
-            <h6>Analysis Complete: ${analysisType.charAt(0).toUpperCase() + analysisType.slice(1)} Analysis</h6>
-            <p>The analysis has identified several significant patterns in the crime data:</p>
-            <ul>
-                <li>Strong correlation between socioeconomic factors and crime rates</li>
-                <li>Seasonal variations showing peaks in summer months</li>
-                <li>Geographic clustering in urban centers</li>
-                <li>Temporal patterns indicating evening crime concentration</li>
-            </ul>
-            <p><strong>Recommendation:</strong> Focus resources on identified hotspots during peak hours.</p>
+    // Calculate insights
+    const totalCrimes = severityData.reduce((sum, item) => sum + item.total_crimes, 0);
+    const highSeverityCrimes = severityData.filter(item => item.severity_level >= 4)
+                                         .reduce((sum, item) => sum + item.total_crimes, 0);
+    const highSeverityPercent = ((highSeverityCrimes / totalCrimes) * 100).toFixed(1);
+    
+    const highestCrimeBorough = boroughData.reduce((max, item) => 
+        item.total_crimes > max.total_crimes ? item : max);
+    const lowestCrimeRateBorough = boroughData.reduce((min, item) => 
+        item.crime_rate < min.crime_rate ? item : min);
+    
+    const avgSeverity = severityData.reduce((sum, item, _, arr) => 
+        sum + (item.severity_level * item.total_crimes), 0) / totalCrimes;
+    
+    insightsDiv.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-exclamation-triangle text-warning"></i> High Severity Crimes</h6>
+                <p>${highSeverityPercent}% of all crimes are high severity (Level 4-5), representing ${formatNumber(highSeverityCrimes)} incidents.</p>
+                
+                <h6><i class="fas fa-map-marker-alt text-primary"></i> Crime Hotspot</h6>
+                <p><strong>${highestCrimeBorough.borough}</strong> has the highest total crimes with ${formatNumber(highestCrimeBorough.total_crimes)} incidents.</p>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-shield-alt text-success"></i> Safest Area</h6>
+                <p><strong>${lowestCrimeRateBorough.borough}</strong> has the lowest crime rate at ${lowestCrimeRateBorough.crime_rate} crimes per 1,000 residents.</p>
+                
+                <h6><i class="fas fa-chart-line text-info"></i> Average Severity</h6>
+                <p>Overall crime severity average is <strong>${avgSeverity.toFixed(2)}</strong> across all incidents.</p>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <strong>Analysis Period:</strong> April 2025 data covering ${formatNumber(totalCrimes)} total incidents across ${boroughData.length} London boroughs.
+                </div>
+            </div>
         </div>
     `;
 }
 
-// Export functions
-function exportToPDF() {
-    alert('PDF export functionality would be implemented here');
+function getSeverityText(level) {
+    const texts = {
+        1: 'Very Low',
+        2: 'Low',
+        3: 'Medium',
+        4: 'High',
+        5: 'Very High'
+    };
+    return texts[level] || 'Unknown';
 }
 
-function exportToExcel() {
-    alert('Excel export functionality would be implemented here');
+function getSeverityClass(level) {
+    if (level <= 2) return 'success';
+    if (level === 3) return 'warning';
+    return 'danger';
 }
 
-function exportData() {
-    alert('Data export functionality would be implemented here');
+async function apiCall(url) {
+    const response = await fetch(url);
+    const result = await response.json();
+    if (!result.success) {
+        throw new Error(result.error || 'API call failed');
+    }
+    return result.data;
+}
+
+function formatNumber(num) {
+    return new Intl.NumberFormat().format(num);
+}
+
+function showError(message) {
+    console.error(message);
+    // You can add UI error display here
 }
 </script>
 {% endblock %}
