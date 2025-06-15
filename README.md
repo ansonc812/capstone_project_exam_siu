@@ -118,15 +118,13 @@ capstone_project_exam/
 The database implements a comprehensive 10-entity schema:
 
 1. **Police Forces** - Force information and resources
-2. **Cities** - Geographic regions and demographics
+2. **Boroughs** - Geographic regions of London and demographics
 3. **Crime Categories** - Classification hierarchy
 4. **Locations** - Specific crime locations
 5. **Crime Incidents** - Main fact table
 6. **Crime Outcomes** - Case resolutions
 7. **Demographics** - Socioeconomic data
-8. **Police Stations** - Infrastructure data
-9. **Time Dimension** - Temporal analysis support
-10. **Crime Statistics** - Aggregated metrics
+8. **Crime Statistics** - Aggregated metrics
 
 ## API Endpoints
 
@@ -157,10 +155,7 @@ The database implements a comprehensive 10-entity schema:
    - Local government socioeconomic data
    - Population and geographic information
 
-3. **Generated Mock Data**
-   - Realistic sample data for demonstration
-   - Statistically valid distributions
-   - Comprehensive coverage for analysis
+
 
 ## Usage Guide
 
