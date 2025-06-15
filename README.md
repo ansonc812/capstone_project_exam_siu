@@ -165,11 +165,13 @@ Clean REST API with consistent JSON responses: `{success: true, data: [results]}
 
 ## Project Info
 
-**Educational capstone project** featuring real London Metropolitan Police crime data visualization.
+**Educational capstone project** developed independently, featuring real London Metropolitan Police crime data visualization.
 
 **Tech Stack**: Flask + Bootstrap 5 + Chart.js + Leaflet.js + Real Crime Data
 
 **Repository**: https://github.com/ansonc812/capstone_project_exam_siu.git
+
+**Author**: Student capstone project
 
 ---
 
